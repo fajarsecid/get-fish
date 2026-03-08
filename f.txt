@@ -1,6 +1,6 @@
 -- ==========================================
 --  ANTI-DETECTION SYSTEM V3 + FAJAR ID PRO V23
--- FULL SCRIPT GABUNGAN (SUDAH FIX TANPA KEY & AUTO FISH)
+-- FULL SCRIPT GABUNGAN (CLEANED - NO HOOKS & NO AUTO FISH)
 -- ==========================================
 
 local HttpService = game:GetService("HttpService")
@@ -14,7 +14,7 @@ local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 
 -- ==========================================
---  MODUL ANTI-DETEKSI (JANGAN DIUBAH)
+--  MODUL ANTI-DETEKSI (SAFE VERSION)
 -- ==========================================
 local AntiDetect = {}
 
@@ -35,141 +35,11 @@ function AntiDetect.RandomChildName(parent)
     end
 end
 
-function AntiDetect.AntiKick()
-    pcall(function()
-        if hookmetamethod and getnamecallmethod then
-            local oldNamecall
-            oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-                local method = getnamecallmethod()
-                local args = {...}
-                if method == "Kick" then
-                    return nil
-                end
-                if method == "TeleportToPlaceInstance" or method == "Teleport" then
-                    local info = tostring(args[1] or "")
-                    if string.find(string.lower(info), "ban") or string.find(string.lower(info), "kick") then
-                        return nil
-                    end
-                end
-                return oldNamecall(self, ...)
-            end)
-        end
-    end)
-end
-
-function AntiDetect.HideRemoteCalls()
-    pcall(function()
-        if hookfunction then
-            local oldFireServer = Instance.new("RemoteEvent").FireServer
-            hookfunction(oldFireServer, function(self, ...)
-                if math.random(1, 3) == 1 then
-                    task.wait(math.random(1, 5) / 100)
-                end
-                return oldFireServer(self, ...)
-            end)
-        end
-    end)
-end
-
 function AntiDetect.ProtectGUI(screenGui)
     pcall(function()
-        if syn and syn.protect_gui then
-            syn.protect_gui(screenGui)
-        elseif protect_gui then
-            protect_gui(screenGui)
-        elseif gethui then
-            screenGui.Parent = gethui()
-        end
-    end)
-end
-
-function AntiDetect.SimulateHumanBehavior()
-    task.spawn(function()
-        while task.wait(math.random(5, 15)) do
-            pcall(function()
-                local camera = workspace.CurrentCamera
-                if camera then
-                    camera.CFrame = camera.CFrame * CFrame.Angles(
-                        math.rad(math.random(-1, 1) * 0.01),
-                        math.rad(math.random(-1, 1) * 0.01),
-                        0
-                    )
-                end
-            end)
-        end
-    end)
-end
-
-function AntiDetect.SpoofHeartbeat()
-    pcall(function()
-        if hookfunction then
-            local oldClock = os.clock
-            local fakeOffset = 0
-            hookfunction(os.clock, function()
-                return oldClock() - fakeOffset
-            end)
-        end
-    end)
-end
-
-function AntiDetect.BlockDetectionRemotes()
-    pcall(function()
-        local suspiciousNames = {
-            "report", "anticheat", "detect", "cheat", "exploit",
-            "hack", "ban", "kick", "flag", "security",
-            "validate", "check", "monitor", "watchdog", "guard",
-            "verification", "integrity", "suspicion", "violation"
-        }
-        if hookfunction then
-            local oldFire
-            oldFire = hookfunction(
-                Instance.new("RemoteEvent").FireServer,
-                function(self, ...)
-                    local remoteName = string.lower(self.Name)
-                    for _, keyword in pairs(suspiciousNames) do
-                        if string.find(remoteName, keyword) then
-                            return nil
-                        end
-                    end
-                    return oldFire(self, ...)
-                end
-            )
-            local oldInvoke
-            oldInvoke = hookfunction(
-                Instance.new("RemoteFunction").InvokeServer,
-                function(self, ...)
-                    local remoteName = string.lower(self.Name)
-                    for _, keyword in pairs(suspiciousNames) do
-                        if string.find(remoteName, keyword) then
-                            return nil
-                        end
-                    end
-                    return oldInvoke(self, ...)
-                end
-            )
-        end
-    end)
-end
-
-function AntiDetect.CleanLogs()
-    pcall(function()
-        local realPrint = print
-        local realWarn = warn
-        local filterWords = {"cheat", "hack", "exploit", "fajar", "delta", "auto fish", "esp", "noclip"}
-        print = function(...)
-            local msg = table.concat({...}, " "):lower()
-            for _, word in pairs(filterWords) do
-                if string.find(msg, word) then return end
-            end
-            return realPrint(...)
-        end
-        warn = function(...)
-            local msg = table.concat({...}, " "):lower()
-            for _, word in pairs(filterWords) do
-                if string.find(msg, word) then return end
-            end
-            return realWarn(...)
-        end
+        if syn and syn.protect_gui then syn.protect_gui(screenGui)
+        elseif protect_gui then protect_gui(screenGui)
+        elseif gethui then screenGui.Parent = gethui() end
     end)
 end
 
@@ -179,57 +49,16 @@ function AntiDetect.ProtectFromDestroy(guiInstance)
             if guiInstance.Parent == nil then
                 task.wait()
                 pcall(function() guiInstance.Parent = CoreGui end)
-                pcall(function()
-                    if guiInstance.Parent == nil then
-                        guiInstance.Parent = player:WaitForChild("PlayerGui")
-                    end
-                end)
+                pcall(function() if guiInstance.Parent == nil then guiInstance.Parent = player:WaitForChild("PlayerGui") end end)
             end
         end)
     end)
 end
 
-function AntiDetect.SpoofCharacterStats()
-    pcall(function()
-        if hookfunction and getrawmetatable and checkcaller and newcclosure and setreadonly then
-            local mt = getrawmetatable(game)
-            local oldIndex = mt.__index
-            local fakeWalkSpeed = 16
-            local fakeJumpPower = 50
-            setreadonly(mt, false)
-            mt.__index = newcclosure(function(self, key)
-                if self:IsA("Humanoid") then
-                    if key == "WalkSpeed" then
-                        if not checkcaller() then return fakeWalkSpeed end
-                    elseif key == "JumpPower" or key == "JumpHeight" then
-                        if not checkcaller() then return fakeJumpPower end
-                    end
-                end
-                return oldIndex(self, key)
-            end)
-            setreadonly(mt, true)
-        end
-    end)
-end
-
 function AntiDetect.ActivateAll(screenGui)
-    AntiDetect.AntiKick()
-    AntiDetect.HideRemoteCalls()
     AntiDetect.ProtectGUI(screenGui)
-    AntiDetect.SimulateHumanBehavior()
-    AntiDetect.SpoofHeartbeat()
-    AntiDetect.BlockDetectionRemotes()
-    AntiDetect.CleanLogs()
     AntiDetect.ProtectFromDestroy(screenGui)
-    AntiDetect.SpoofCharacterStats()
-    task.spawn(function()
-        while task.wait(30) do
-            pcall(function()
-                AntiDetect.RandomChildName(screenGui)
-            end)
-        end
-    end)
-    print("System loaded.")
+    task.spawn(function() while task.wait(30) do pcall(function() AntiDetect.RandomChildName(screenGui) end) end end)
 end
 
 -- ==========================================
@@ -241,22 +70,19 @@ player.Idled:Connect(function()
 end)
 
 -- ==========================================
--- MEMBUAT GUI (NAMA RANDOM)
+-- MEMBUAT GUI
 -- ==========================================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = AntiDetect.RandomName()
 screenGui.ResetOnSpawn = false
-
 local success = pcall(function() screenGui.Parent = CoreGui end)
 if not success then screenGui.Parent = player:WaitForChild("PlayerGui") end
 
---  AKTIFKAN SEMUA ANTI-DETEKSI
 AntiDetect.ActivateAll(screenGui)
 
 local function animateButtonColor(button, targetColor)
     local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local tween = TweenService:Create(button, tweenInfo, {BackgroundColor3 = targetColor})
-    tween:Play()
+    TweenService:Create(button, tweenInfo, {BackgroundColor3 = targetColor}):Play()
 end
 
 local function safeTeleport(targetCFrame)
@@ -288,21 +114,19 @@ mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.ClipsDescendants = true
-mainFrame.Visible = true -- Langsung terlihat tanpa key
+mainFrame.Visible = true
 
-local mainCorner = Instance.new("UICorner") mainCorner.CornerRadius = UDim.new(0, 10) mainCorner.Parent = mainFrame
-local mainStroke = Instance.new("UIStroke") mainStroke.Parent = mainFrame mainStroke.Thickness = 2 mainStroke.Color = Color3.fromRGB(0, 200, 255)
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
+local mainStroke = Instance.new("UIStroke", mainFrame) mainStroke.Thickness = 2 mainStroke.Color = Color3.fromRGB(0, 200, 255)
 
-local topBar = Instance.new("Frame")
-topBar.Parent = mainFrame
+local topBar = Instance.new("Frame", mainFrame)
 topBar.Size = UDim2.new(1, 0, 0, 35)
 topBar.BackgroundColor3 = Color3.fromRGB(15, 17, 22)
 topBar.BorderSizePixel = 0
-local topBarCorner = Instance.new("UICorner") topBarCorner.CornerRadius = UDim.new(0, 10) topBarCorner.Parent = topBar
-local topBarBottomFix = Instance.new("Frame") topBarBottomFix.Parent = topBar topBarBottomFix.Size = UDim2.new(1, 0, 0, 10) topBarBottomFix.Position = UDim2.new(0, 0, 1, -10) topBarBottomFix.BackgroundColor3 = Color3.fromRGB(15, 17, 22) topBarBottomFix.BorderSizePixel = 0
+Instance.new("UICorner", topBar).CornerRadius = UDim.new(0, 10)
+local topBarBottomFix = Instance.new("Frame", topBar) topBarBottomFix.Size = UDim2.new(1, 0, 0, 10) topBarBottomFix.Position = UDim2.new(0, 0, 1, -10) topBarBottomFix.BackgroundColor3 = Color3.fromRGB(15, 17, 22) topBarBottomFix.BorderSizePixel = 0
 
-local title = Instance.new("TextLabel")
-title.Parent = topBar
+local title = Instance.new("TextLabel", topBar)
 title.Size = UDim2.new(1, -40, 1, 0)
 title.Position = UDim2.new(0, 10, 0, 0)
 title.BackgroundTransparency = 1
@@ -312,8 +136,7 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 14
 title.TextXAlignment = Enum.TextXAlignment.Left
 
-local minimizeBtn = Instance.new("TextButton")
-minimizeBtn.Parent = topBar
+local minimizeBtn = Instance.new("TextButton", topBar)
 minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
 minimizeBtn.Position = UDim2.new(1, -35, 0, 2)
 minimizeBtn.BackgroundColor3 = Color3.fromRGB(30, 33, 40)
@@ -322,22 +145,19 @@ minimizeBtn.Text = "-"
 minimizeBtn.Font = Enum.Font.GothamBold
 minimizeBtn.TextSize = 20
 minimizeBtn.BorderSizePixel = 0
-local minBtnCorner = Instance.new("UICorner") minBtnCorner.CornerRadius = UDim.new(0, 6) minBtnCorner.Parent = minimizeBtn
+Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 6)
 
 -- ------------------------------------------
 -- SISTEM TAB
 -- ------------------------------------------
-local tabMenu = Instance.new("Frame")
-tabMenu.Parent = mainFrame
+local tabMenu = Instance.new("Frame", mainFrame)
 tabMenu.Size = UDim2.new(1, 0, 0, 30)
 tabMenu.Position = UDim2.new(0, 0, 0, 35)
 tabMenu.BackgroundColor3 = Color3.fromRGB(25, 28, 35)
 tabMenu.BorderSizePixel = 0
-tabMenu.Visible = true
 
 local btnTabMain = Instance.new("TextButton", tabMenu)
 btnTabMain.Size = UDim2.new(0.25, 0, 1, 0)
-btnTabMain.Position = UDim2.new(0, 0, 0, 0)
 btnTabMain.BackgroundColor3 = Color3.fromRGB(25, 28, 35)
 btnTabMain.TextColor3 = Color3.fromRGB(0, 200, 255)
 btnTabMain.Text = "MAIN"
@@ -372,8 +192,7 @@ btnTabProtect.Font = Enum.Font.GothamSemibold
 btnTabProtect.TextSize = 11
 
 local function createContainer()
-    local container = Instance.new("ScrollingFrame")
-    container.Parent = mainFrame
+    local container = Instance.new("ScrollingFrame", mainFrame)
     container.Size = UDim2.new(1, 0, 1, -90)
     container.Position = UDim2.new(0, 0, 0, 70)
     container.BackgroundTransparency = 1
@@ -387,7 +206,7 @@ local function createContainer()
     listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         container.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 15)
     end)
-    local spacer = Instance.new("Frame") spacer.Parent = container spacer.Size = UDim2.new(1, 0, 0, 2) spacer.BackgroundTransparency = 1
+    local spacer = Instance.new("Frame", container) spacer.Size = UDim2.new(1, 0, 0, 2) spacer.BackgroundTransparency = 1
     return container
 end
 
@@ -415,11 +234,9 @@ btnTabMain.MouseButton1Click:Connect(function() switchTab(MainContainer, btnTabM
 btnTabTeleport.MouseButton1Click:Connect(function() switchTab(TeleportContainer, btnTabTeleport) end)
 btnTabTroll.MouseButton1Click:Connect(function() switchTab(TrollContainer, btnTabTroll) end)
 btnTabProtect.MouseButton1Click:Connect(function() switchTab(ProtectContainer, btnTabProtect) end)
-switchTab(MainContainer, btnTabMain)
 
 local function createButton(text, parent)
-    local btn = Instance.new("TextButton")
-    btn.Parent = parent or MainContainer
+    local btn = Instance.new("TextButton", parent or MainContainer)
     btn.Size = UDim2.new(0.85, 0, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(35, 38, 46)
     btn.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -427,8 +244,8 @@ local function createButton(text, parent)
     btn.TextSize = 13
     btn.Text = text .. " [OFF]"
     btn.AutoButtonColor = false
-    local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0, 6) corner.Parent = btn
-    local stroke = Instance.new("UIStroke") stroke.Parent = btn stroke.Thickness = 1 stroke.Color = Color3.fromRGB(50, 55, 65)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    local stroke = Instance.new("UIStroke", btn) stroke.Thickness = 1 stroke.Color = Color3.fromRGB(50, 55, 65)
     return btn, stroke
 end
 
@@ -461,8 +278,7 @@ local listLokasiCustom = {
 }
 local targetTeleportCFrame = nil
 
-local lblTeleport = Instance.new("TextLabel")
-lblTeleport.Parent = TeleportContainer
+local lblTeleport = Instance.new("TextLabel", TeleportContainer)
 lblTeleport.Size = UDim2.new(0.85, 0, 0, 30)
 lblTeleport.BackgroundTransparency = 1
 lblTeleport.TextColor3 = Color3.fromRGB(0, 200, 255)
@@ -470,8 +286,7 @@ lblTeleport.Text = "PILIH LOKASI:"
 lblTeleport.Font = Enum.Font.GothamBold
 lblTeleport.TextSize = 14
 
-local ScrollPulau = Instance.new("ScrollingFrame")
-ScrollPulau.Parent = TeleportContainer
+local ScrollPulau = Instance.new("ScrollingFrame", TeleportContainer)
 ScrollPulau.Size = UDim2.new(0.85, 0, 0, 160)
 ScrollPulau.BackgroundColor3 = Color3.fromRGB(15, 18, 24)
 ScrollPulau.ScrollBarThickness = 4
@@ -480,15 +295,13 @@ ScrollPulau.BorderSizePixel = 0
 Instance.new("UICorner", ScrollPulau).CornerRadius = UDim.new(0, 6)
 Instance.new("UIStroke", ScrollPulau).Color = Color3.fromRGB(50, 60, 70)
 
-local UIListPulau = Instance.new("UIListLayout")
-UIListPulau.Parent = ScrollPulau
+local UIListPulau = Instance.new("UIListLayout", ScrollPulau)
 UIListPulau.Padding = UDim.new(0, 5)
 UIListPulau.HorizontalAlignment = Enum.HorizontalAlignment.Center
 UIListPulau.SortOrder = Enum.SortOrder.LayoutOrder
 
 local function BuatTombolPulau(data)
-    local btn = Instance.new("TextButton")
-    btn.Parent = ScrollPulau
+    local btn = Instance.new("TextButton", ScrollPulau)
     btn.Size = UDim2.new(0.95, 0, 0, 30)
     btn.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
     btn.TextColor3 = Color3.fromRGB(220, 220, 220)
@@ -516,13 +329,9 @@ for _, data in pairs(listLokasiCustom) do
 end
 ScrollPulau.CanvasSize = UDim2.new(0, 0, 0, ySizePulau)
 
-local spacerTele = Instance.new("Frame")
-spacerTele.Parent = TeleportContainer
-spacerTele.Size = UDim2.new(1, 0, 0, 5)
-spacerTele.BackgroundTransparency = 1
+local spacerTele = Instance.new("Frame", TeleportContainer) spacerTele.Size = UDim2.new(1, 0, 0, 5) spacerTele.BackgroundTransparency = 1
 
-local btnGoTeleport = Instance.new("TextButton")
-btnGoTeleport.Parent = TeleportContainer
+local btnGoTeleport = Instance.new("TextButton", TeleportContainer)
 btnGoTeleport.Size = UDim2.new(0.85, 0, 0, 40)
 btnGoTeleport.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 btnGoTeleport.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -552,8 +361,7 @@ end)
 -- ==========================================
 local selectedPlayer = nil
 
-local btnBukaMenuPlayer = Instance.new("TextButton")
-btnBukaMenuPlayer.Parent = TrollContainer
+local btnBukaMenuPlayer = Instance.new("TextButton", TrollContainer)
 btnBukaMenuPlayer.Size = UDim2.new(0.85, 0, 0, 30)
 btnBukaMenuPlayer.BackgroundColor3 = Color3.fromRGB(35, 25, 45)
 btnBukaMenuPlayer.TextColor3 = Color3.fromRGB(255, 100, 255)
@@ -583,7 +391,7 @@ btnCopyAvatar.TextSize = 13
 btnCopyAvatar.Text = " COPY AVATAR"
 Instance.new("UICorner", btnCopyAvatar).CornerRadius = UDim.new(0, 6)
 
-local spacerTroll = Instance.new("Frame") spacerTroll.Parent = TrollContainer spacerTroll.Size = UDim2.new(1, 0, 0, 5) spacerTroll.BackgroundTransparency = 1
+local spacerTroll = Instance.new("Frame", TrollContainer) spacerTroll.Size = UDim2.new(1, 0, 0, 5) spacerTroll.BackgroundTransparency = 1
 
 local btnSpectate, strokeSpectate = createButton(" CCTV Mode", TrollContainer)
 local btnOrbit, strokeOrbit = createButton(" Orbit Ganggu", TrollContainer)
@@ -602,18 +410,16 @@ Instance.new("UICorner", btnGoTelePlayer).CornerRadius = UDim.new(0, 6)
 -- ==========================================
 local btnHideName, strokeHideName = createButton("Hide Name (Anti-Ban)", ProtectContainer)
 
-local playerListFrame = Instance.new("Frame")
-playerListFrame.Parent = screenGui
+local playerListFrame = Instance.new("Frame", screenGui)
 playerListFrame.Size = UDim2.new(0, 180, 0, 200)
 playerListFrame.Position = UDim2.new(0.5, 130, 0.15, 0)
 playerListFrame.BackgroundColor3 = Color3.fromRGB(25, 20, 30)
 playerListFrame.Visible = false
 playerListFrame.ZIndex = 100
-local plCorner = Instance.new("UICorner") plCorner.CornerRadius = UDim.new(0, 10) plCorner.Parent = playerListFrame
-local plStroke = Instance.new("UIStroke") plStroke.Parent = playerListFrame plStroke.Color = Color3.fromRGB(200, 50, 200) plStroke.Thickness = 2
+Instance.new("UICorner", playerListFrame).CornerRadius = UDim.new(0, 10)
+local plStroke = Instance.new("UIStroke", playerListFrame) plStroke.Color = Color3.fromRGB(200, 50, 200) plStroke.Thickness = 2
 
-local plTitle = Instance.new("TextLabel")
-plTitle.Parent = playerListFrame
+local plTitle = Instance.new("TextLabel", playerListFrame)
 plTitle.Size = UDim2.new(1, 0, 0, 30)
 plTitle.BackgroundTransparency = 1
 plTitle.TextColor3 = Color3.fromRGB(255, 100, 255)
@@ -622,8 +428,7 @@ plTitle.Font = Enum.Font.GothamBold
 plTitle.TextSize = 14
 plTitle.ZIndex = 101
 
-local plCloseBtn = Instance.new("TextButton")
-plCloseBtn.Parent = playerListFrame
+local plCloseBtn = Instance.new("TextButton", playerListFrame)
 plCloseBtn.Size = UDim2.new(0, 30, 0, 30)
 plCloseBtn.Position = UDim2.new(1, -30, 0, 0)
 plCloseBtn.BackgroundTransparency = 1
@@ -634,8 +439,7 @@ plCloseBtn.TextSize = 16
 plCloseBtn.ZIndex = 101
 plCloseBtn.MouseButton1Click:Connect(function() playerListFrame.Visible = false end)
 
-local plRefreshBtn = Instance.new("TextButton")
-plRefreshBtn.Parent = playerListFrame
+local plRefreshBtn = Instance.new("TextButton", playerListFrame)
 plRefreshBtn.AnchorPoint = Vector2.new(0.5, 0.5)
 plRefreshBtn.Size = UDim2.new(0, 70, 0, 30)
 plRefreshBtn.Position = UDim2.new(1, -65, 0, 15)
@@ -646,8 +450,7 @@ plRefreshBtn.Font = Enum.Font.GothamBold
 plRefreshBtn.TextSize = 12
 plRefreshBtn.ZIndex = 101
 
-local playerScroll = Instance.new("ScrollingFrame")
-playerScroll.Parent = playerListFrame
+local playerScroll = Instance.new("ScrollingFrame", playerListFrame)
 playerScroll.Size = UDim2.new(1, 0, 1, -35)
 playerScroll.Position = UDim2.new(0, 0, 0, 35)
 playerScroll.BackgroundTransparency = 1
@@ -655,13 +458,11 @@ playerScroll.ScrollBarThickness = 4
 playerScroll.ScrollBarImageColor3 = Color3.fromRGB(200, 50, 200)
 playerScroll.ZIndex = 101
 
-local plListLayout = Instance.new("UIListLayout")
-plListLayout.Parent = playerScroll
+local plListLayout = Instance.new("UIListLayout", playerScroll)
 plListLayout.Padding = UDim.new(0, 5)
 plListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-local watermark = Instance.new("TextLabel")
-watermark.Parent = mainFrame
+local watermark = Instance.new("TextLabel", mainFrame)
 watermark.Size = UDim2.new(1, 0, 0, 20)
 watermark.Position = UDim2.new(0, 0, 1, -22)
 watermark.BackgroundTransparency = 1
@@ -716,14 +517,10 @@ local function ApplyHideName(char, state)
     if char and char:FindFirstChild("Humanoid") then
         if state then
             char.Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-            for _, v in pairs(char:GetDescendants()) do
-                if (v:IsA("BillboardGui") or v:IsA("SurfaceGui")) and v.Name ~= AntiDetect.RandomName() then v.Enabled = false end
-            end
+            for _, v in pairs(char:GetDescendants()) do if (v:IsA("BillboardGui") or v:IsA("SurfaceGui")) and v.Name ~= AntiDetect.RandomName() then v.Enabled = false end end
         else
             char.Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
-            for _, v in pairs(char:GetDescendants()) do
-                if (v:IsA("BillboardGui") or v:IsA("SurfaceGui")) then v.Enabled = true end
-            end
+            for _, v in pairs(char:GetDescendants()) do if (v:IsA("BillboardGui") or v:IsA("SurfaceGui")) then v.Enabled = true end end
         end
     end
 end
@@ -748,9 +545,7 @@ btnCopyAvatar.MouseButton1Click:Connect(function()
             animateButtonColor(btnCopyAvatar, Color3.fromRGB(0, 100, 0))
             pcall(function()
                 for _, v in pairs(myChar:GetChildren()) do
-                    if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") then
-                        v:Destroy()
-                    end
+                    if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") then v:Destroy() end
                 end
                 task.wait(0.1)
                 for _, v in pairs(targetChar:GetChildren()) do
@@ -766,14 +561,8 @@ btnCopyAvatar.MouseButton1Click:Connect(function()
                 local myHead = myChar:FindFirstChild("Head")
                 local targetHead = targetChar:FindFirstChild("Head")
                 if myHead and targetHead then
-                    for _, obj in pairs(myHead:GetChildren()) do
-                        if obj:IsA("Decal") or obj:IsA("SpecialMesh") then obj:Destroy() end
-                    end
-                    for _, obj in pairs(targetHead:GetChildren()) do
-                        if obj:IsA("Decal") or obj:IsA("SpecialMesh") then
-                            obj:Clone().Parent = myHead
-                        end
-                    end
+                    for _, obj in pairs(myHead:GetChildren()) do if obj:IsA("Decal") or obj:IsA("SpecialMesh") then obj:Destroy() end end
+                    for _, obj in pairs(targetHead:GetChildren()) do if obj:IsA("Decal") or obj:IsA("SpecialMesh") then obj:Clone().Parent = myHead end end
                 end
             end)
             btnCopyAvatar.Text = " BERHASIL DICOPY!"
@@ -814,27 +603,17 @@ task.spawn(function()
                 }
                 for _, remote in pairs(remotesToTry) do
                     if remote then
-                        if remote:IsA("RemoteEvent") then
-                            remote:FireServer()
-                        elseif remote:IsA("RemoteFunction") then
-                            remote:InvokeServer()
-                        end
+                        if remote:IsA("RemoteEvent") then remote:FireServer() elseif remote:IsA("RemoteFunction") then remote:InvokeServer() end
                     end
                 end
                 if playerGui then
                     for _, guiObj in pairs(playerGui:GetDescendants()) do
                         if guiObj:IsA("TextButton") or guiObj:IsA("ImageButton") then
                             local textLower = ""
-                            if guiObj:IsA("TextButton") then
-                                textLower = string.lower(guiObj.Text)
-                            end
+                            if guiObj:IsA("TextButton") then textLower = string.lower(guiObj.Text) end
                             local nameLower = string.lower(guiObj.Name)
                             if string.find(textLower, "sell") or string.find(nameLower, "sell") or string.find(textLower, "jual") then
-                                if getconnections then
-                                    for _, connection in pairs(getconnections(guiObj.MouseButton1Click)) do
-                                        connection:Fire()
-                                    end
-                                end
+                                if getconnections then for _, connection in pairs(getconnections(guiObj.MouseButton1Click)) do connection:Fire() end end
                             end
                         end
                     end
@@ -867,56 +646,29 @@ btnFPS.MouseButton1Click:Connect(function()
         origFog = Lighting.FogEnd
         Lighting.GlobalShadows = false
         Lighting.FogEnd = 9e9
-        if terrain then
-            terrain.WaterWaveSize = 0
-            terrain.WaterWaveSpeed = 0
-            terrain.WaterReflectance = 0
-        end
+        if terrain then terrain.WaterWaveSize = 0; terrain.WaterWaveSpeed = 0; terrain.WaterReflectance = 0 end
         local function optimizeObject(v)
             pcall(function()
-                if v:IsA("BasePart") and v.Name ~= "Terrain" then
-                    v.Material = Enum.Material.SmoothPlastic
-                    v.CastShadow = false
-                    v.Reflectance = 0
-                elseif v:IsA("Decal") or v:IsA("Texture") then
-                    v.Transparency = 1
-                elseif v:IsA("Light") then
-                    v.Enabled = false
-                elseif v:IsA("Highlight") then
-                    v.Enabled = false
-                elseif v:IsA("PostEffect") then
-                    v.Enabled = false
-                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Sparkles") or v:IsA("Fire") or v:IsA("Smoke") then
-                    v.Enabled = false
-                end
+                if v:IsA("BasePart") and v.Name ~= "Terrain" then v.Material = Enum.Material.SmoothPlastic; v.CastShadow = false; v.Reflectance = 0
+                elseif v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 1
+                elseif v:IsA("Light") or v:IsA("Highlight") or v:IsA("PostEffect") or v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Sparkles") or v:IsA("Fire") or v:IsA("Smoke") then v.Enabled = false end
             end)
         end
         for _, v in pairs(workspace:GetDescendants()) do optimizeObject(v) end
         for _, v in pairs(Lighting:GetChildren()) do optimizeObject(v) end
-        if player.Character then
-            for _, v in pairs(player.Character:GetDescendants()) do optimizeObject(v) end
-        end
+        if player.Character then for _, v in pairs(player.Character:GetDescendants()) do optimizeObject(v) end end
         fpsConnection = workspace.DescendantAdded:Connect(function(v) optimizeObject(v) end)
     else
         pcall(function() setfpscap(60) end)
         Lighting.GlobalShadows = origShadows
         Lighting.FogEnd = origFog
-        if terrain then
-            terrain.WaterWaveSize = 0.15
-            terrain.WaterWaveSpeed = 10
-            terrain.WaterReflectance = 1
-        end
+        if terrain then terrain.WaterWaveSize = 0.15; terrain.WaterWaveSpeed = 10; terrain.WaterReflectance = 1 end
         if fpsConnection then fpsConnection:Disconnect() fpsConnection = nil end
         pcall(function()
-            for _, v in pairs(Lighting:GetChildren()) do
-                if v:IsA("PostEffect") then v.Enabled = true end
-            end
+            for _, v in pairs(Lighting:GetChildren()) do if v:IsA("PostEffect") then v.Enabled = true end end
             for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("Light") or v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Highlight") then
-                    v.Enabled = true
-                elseif (v:IsA("Decal") or v:IsA("Texture")) then
-                    v.Transparency = 0
-                end
+                if v:IsA("Light") or v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Highlight") then v.Enabled = true
+                elseif (v:IsA("Decal") or v:IsA("Texture")) then v.Transparency = 0 end
             end
         end)
     end
@@ -934,10 +686,7 @@ task.spawn(function()
                 if isESP then
                     if not p.Character:FindFirstChild(espTag) then
                         local hl = Instance.new("Highlight", p.Character)
-                        hl.Name = espTag
-                        hl.FillColor = Color3.fromRGB(0, 255, 255)
-                        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        hl.FillTransparency = 0.5
+                        hl.Name = espTag; hl.FillColor = Color3.fromRGB(0, 255, 255); hl.OutlineColor = Color3.fromRGB(255, 255, 255); hl.FillTransparency = 0.5
                     end
                 else
                     if p.Character:FindFirstChild(espTag) then p.Character[espTag]:Destroy() end
@@ -983,29 +732,19 @@ btnFly.MouseButton1Click:Connect(function() isFlyOn = not isFlyOn toggleButtonVi
 -- PLAYER LIST SYSTEM
 -- =====================
 local function RefreshPlayerList()
-    for _, child in pairs(playerScroll:GetChildren()) do
-        if child:IsA("TextButton") then child:Destroy() end
-    end
+    for _, child in pairs(playerScroll:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end
     local ySize = 0
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
             local btn = Instance.new("TextButton", playerScroll)
-            btn.Size = UDim2.new(0.9, 0, 0, 30)
-            btn.BackgroundColor3 = Color3.fromRGB(40, 30, 50)
-            btn.TextColor3 = Color3.fromRGB(200, 150, 255)
-            btn.Font = Enum.Font.GothamSemibold
-            btn.TextSize = 12
-            btn.Text = p.Name
-            btn.ZIndex = 102
+            btn.Size = UDim2.new(0.9, 0, 0, 30); btn.BackgroundColor3 = Color3.fromRGB(40, 30, 50); btn.TextColor3 = Color3.fromRGB(200, 150, 255); btn.Font = Enum.Font.GothamSemibold; btn.TextSize = 12; btn.Text = p.Name; btn.ZIndex = 102
             Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
             btn.MouseButton1Click:Connect(function()
                 selectedPlayer = p
                 btnBukaMenuPlayer.Text = "Target: " .. (string.len(p.Name) > 10 and string.sub(p.Name, 1, 9)..".." or p.Name)
                 playerListFrame.Visible = false
                 pcall(function()
-                    local thumbType = Enum.ThumbnailType.AvatarBust
-                    local thumbSize = Enum.ThumbnailSize.Size420x420
-                    local content = Players:GetUserThumbnailAsync(p.UserId, thumbType, thumbSize)
+                    local content = Players:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.AvatarBust, Enum.ThumbnailSize.Size420x420)
                     previewImage.Image = content
                 end)
             end)
@@ -1015,63 +754,36 @@ local function RefreshPlayerList()
     playerScroll.CanvasSize = UDim2.new(0, 0, 0, ySize)
 end
 
-Players.PlayerAdded:Connect(function()
-    if playerListFrame.Visible then RefreshPlayerList() end
-end)
-
+Players.PlayerAdded:Connect(function() if playerListFrame.Visible then RefreshPlayerList() end end)
 Players.PlayerRemoving:Connect(function(removedPlayer)
     if selectedPlayer == removedPlayer then
-        selectedPlayer = nil
-        btnBukaMenuPlayer.Text = "Target Leave! "
-        previewImage.Image = ""
-        isOrbit = false
-        isSpectate = false
-        pcall(function()
-            workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") or workspace.CurrentCamera
-        end)
+        selectedPlayer = nil; btnBukaMenuPlayer.Text = "Target Leave! "; previewImage.Image = ""; isOrbit = false; isSpectate = false
+        pcall(function() workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") or workspace.CurrentCamera end)
     end
     if playerListFrame.Visible then RefreshPlayerList() end
 end)
 
 plRefreshBtn.MouseButton1Click:Connect(function()
     plRefreshBtn.Rotation = 0
-    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local spinTween = TweenService:Create(plRefreshBtn, tweenInfo, {Rotation = 360})
-    spinTween:Play()
+    TweenService:Create(plRefreshBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 360}):Play()
     RefreshPlayerList()
 end)
 
-btnBukaMenuPlayer.MouseButton1Click:Connect(function()
-    playerListFrame.Visible = not playerListFrame.Visible
-    if playerListFrame.Visible then RefreshPlayerList() end
-end)
+btnBukaMenuPlayer.MouseButton1Click:Connect(function() playerListFrame.Visible = not playerListFrame.Visible; if playerListFrame.Visible then RefreshPlayerList() end end)
 
 -- =====================
 -- TP KE TARGET
 -- =====================
 btnGoTelePlayer.MouseButton1Click:Connect(function()
-    if not selectedPlayer then
-        btnGoTelePlayer.Text = " PILIH TARGET DULU!"
-        task.wait(1.5) btnGoTelePlayer.Text = " TP KE TARGET"
-        return
-    end
-    if selectedPlayer.Parent == nil then
-        btnGoTelePlayer.Text = " PLAYER LEAVE!"
-        selectedPlayer = nil
-        task.wait(1.5) btnGoTelePlayer.Text = " TP KE TARGET"
-        return
-    end
+    if not selectedPlayer then btnGoTelePlayer.Text = " PILIH TARGET DULU!"; task.wait(1.5); btnGoTelePlayer.Text = " TP KE TARGET"; return end
+    if selectedPlayer.Parent == nil then btnGoTelePlayer.Text = " PLAYER LEAVE!"; selectedPlayer = nil; task.wait(1.5); btnGoTelePlayer.Text = " TP KE TARGET"; return end
     local targetChar = selectedPlayer.Character or selectedPlayer.CharacterAdded:Wait()
     local targetHrp = targetChar:WaitForChild("HumanoidRootPart", 2)
     if targetHrp then
-        animateButtonColor(btnGoTelePlayer, Color3.fromRGB(100, 0, 180))
-        btnGoTelePlayer.Text = "MENGINCAR..."
-        safeTeleport(targetHrp.CFrame * CFrame.new(0, 0, 3))
-        btnGoTelePlayer.Text = " TP KE TARGET"
-        animateButtonColor(btnGoTelePlayer, Color3.fromRGB(150, 0, 255))
+        animateButtonColor(btnGoTelePlayer, Color3.fromRGB(100, 0, 180)); btnGoTelePlayer.Text = "MENGINCAR..."
+        safeTeleport(targetHrp.CFrame * CFrame.new(0, 0, 3)); btnGoTelePlayer.Text = " TP KE TARGET"; animateButtonColor(btnGoTelePlayer, Color3.fromRGB(150, 0, 255))
     else
-        btnGoTelePlayer.Text = " TUBUH TIDAK LOAD!"
-        task.wait(1.5) btnGoTelePlayer.Text = " TP KE TARGET"
+        btnGoTelePlayer.Text = " TUBUH TIDAK LOAD!"; task.wait(1.5); btnGoTelePlayer.Text = " TP KE TARGET"
     end
 end)
 
@@ -1079,31 +791,21 @@ end)
 -- CCTV MODE
 -- =====================
 btnSpectate.MouseButton1Click:Connect(function()
-    if not selectedPlayer then
-        btnSpectate.Text = " PILIH TARGET DULU!"
-        task.wait(1) toggleTrollVisual(btnSpectate, strokeSpectate, isSpectate, " CCTV Mode")
-        return
-    end
+    if not selectedPlayer then btnSpectate.Text = " PILIH TARGET DULU!"; task.wait(1); toggleTrollVisual(btnSpectate, strokeSpectate, isSpectate, " CCTV Mode"); return end
     isSpectate = not isSpectate
     toggleTrollVisual(btnSpectate, strokeSpectate, isSpectate, " CCTV Mode")
     if isSpectate then
         task.spawn(function()
             while isSpectate and selectedPlayer and selectedPlayer.Parent ~= nil do
-                local char = selectedPlayer.Character
-                local hum = char and char:FindFirstChild("Humanoid")
+                local hum = selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("Humanoid")
                 if hum then workspace.CurrentCamera.CameraSubject = hum end
                 task.wait(0.5)
             end
-            pcall(function()
-                workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid")
-            end)
-            isSpectate = false
-            toggleTrollVisual(btnSpectate, strokeSpectate, false, " CCTV Mode")
+            pcall(function() workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end)
+            isSpectate = false; toggleTrollVisual(btnSpectate, strokeSpectate, false, " CCTV Mode")
         end)
     else
-        pcall(function()
-            workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid")
-        end)
+        pcall(function() workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end)
     end
 end)
 
@@ -1112,17 +814,8 @@ end)
 -- =====================
 local orbitAngle = 0
 btnOrbit.MouseButton1Click:Connect(function()
-    if not selectedPlayer then
-        btnOrbit.Text = "PILIH TARGET DULU!"
-        task.wait(1) toggleTrollVisual(btnOrbit, strokeOrbit, isOrbit, " Orbit Ganggu")
-        return
-    end
-    isOrbit = not isOrbit
-    toggleTrollVisual(btnOrbit, strokeOrbit, isOrbit, " Orbit Ganggu")
-    if isOrbit then
-        isNoclip = true
-        toggleButtonVisual(btnNoclip, strokeNoclip, true, "Noclip")
-    end
+    if not selectedPlayer then btnOrbit.Text = "PILIH TARGET DULU!"; task.wait(1); toggleTrollVisual(btnOrbit, strokeOrbit, isOrbit, " Orbit Ganggu"); return end
+    isOrbit = not isOrbit; toggleTrollVisual(btnOrbit, strokeOrbit, isOrbit, " Orbit Ganggu")
+    if isOrbit then isNoclip = true; toggleButtonVisual(btnNoclip, strokeNoclip, true, "Noclip") end
 end)
 task.spawn(function() RunService.RenderStepped:Connect(function() if isOrbit and selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("Head") then local myHrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart") if myHrp then orbitAngle = orbitAngle + 15 if orbitAngle >= 360 then orbitAngle = 0 end myHrp.CFrame = selectedPlayer.Character.Head.CFrame * CFrame.Angles(0, math.rad(orbitAngle), 0) * CFrame.new(0, 0, -2) end end end) end)
-
