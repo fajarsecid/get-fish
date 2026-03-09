@@ -869,7 +869,7 @@ local function LoadMainScripts()
                         setStatus("RESTARTING FISH (1X LIMIT)...", Color3.fromRGB(255, 100, 255))
                         task.spawn(function()
                             SetAutoFishState(false)
-                            task.wait(1.5) -- Jeda optimal agar game tidak mendeteksi pergerakan beruntun
+                            task.wait(.2) -- Jeda optimal agar game tidak mendeteksi pergerakan beruntun
                             fishCatchCount = 0
                             SetAutoFishState(true)
                         end)
