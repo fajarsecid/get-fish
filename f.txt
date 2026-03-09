@@ -866,7 +866,7 @@ local function LoadMainScripts()
                 local function ProcessFishCaught(reason)
                     fishCatchCount = fishCatchCount + 1
                     if fishCatchCount >= 1 then
-                        setStatus("RESTARTING FISH (10X LIMIT)...", Color3.fromRGB(255, 100, 255))
+                        setStatus("RESTARTING FISH (1X LIMIT)...", Color3.fromRGB(255, 100, 255))
                         task.spawn(function()
                             SetAutoFishState(false)
                             task.wait(1.5) -- Jeda optimal agar game tidak mendeteksi pergerakan beruntun
@@ -879,7 +879,7 @@ local function LoadMainScripts()
                 end
 
                 if yz == nil and yzEverSeen then
-                    setStatus("IKAN DAPAT! (bar hilang) [".. (fishCatchCount + 1) .."/10]", Color3.fromRGB(0, 255, 150))
+                    setStatus("IKAN DAPAT! (bar hilang) [".. (fishCatchCount + 1) .."/1]", Color3.fromRGB(0, 255, 150))
                     cachedMGRoot = nil; cachedRedBar = nil; cachedYellowZone = nil
                     ProcessFishCaught("yz hilang")
                 elseif mgDur >= mgTimeout then
