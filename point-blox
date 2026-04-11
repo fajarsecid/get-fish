@@ -1,4 +1,12 @@
 -- ==========================================
+-- ANTI-DUPLICATE GUARD (PENTING BUAT ANTI-LAG)
+-- ==========================================
+if getgenv().LiteHack_UltimateLoaded then
+    return
+end
+getgenv().LiteHack_UltimateLoaded = true
+
+-- ==========================================
 -- 🎯 LITE HACK + ULTIMATE MODS (ANTI-GM/MOD + RPM + NO RELOAD)
 -- ==========================================
 local Players = game:GetService("Players")
@@ -14,29 +22,70 @@ local LocalPlayer = Players.LocalPlayer
 -- ==========================================
 task.spawn(function()
     pcall(function()
-        if setreadonly then pcall(function() setreadonly(getrenv(), false); setreadonly(getreg(), false); setreadonly(getgc(), false) end) end
-        if make_writeable then pcall(function() make_writeable(getreg()) end) end
-        if detour_function then detour_function = function(...) return true end end
-        if getconnections then pcall(function() for _, connection in ipairs(getconnections(ScriptContext.Error)) do connection:Disable() end end) end
-        if getcallingscript then pcall(function() getcallingscript = function() return nil end end) end
+        if setreadonly then
+            pcall(function()
+                setreadonly(getrenv(), false)
+                setreadonly(getreg(), false)
+                setreadonly(getgc(), false)
+            end)
+        end
+
+        if make_writeable then
+            pcall(function()
+                make_writeable(getreg())
+            end)
+        end
+
+        if detour_function then
+            detour_function = function(...)
+                return true
+            end
+        end
+
+        if getconnections then
+            pcall(function()
+                for _, connection in ipairs(getconnections(ScriptContext.Error)) do
+                    connection:Disable()
+                end
+            end)
+        end
+
+        if getcallingscript then
+            pcall(function()
+                getcallingscript = function()
+                    return nil
+                end
+            end)
+        end
+
         for _, tableName in ipairs({"_G", "shared"}) do
             pcall(function()
                 local target = getgenv()[tableName]
                 if target and type(target) == "table" then
                     for key, _ in pairs(target) do
                         local strKey = tostring(key):lower()
-                        if strKey:find("signature") or strKey:find("checksum") or strKey:find("hash") then target[key] = nil end
+                        if strKey:find("signature") or strKey:find("checksum") or strKey:find("hash") then
+                            target[key] = nil
+                        end
                     end
                 end
             end)
         end
+
         for _, remote in ipairs(ReplicatedStorage:GetDescendants()) do
             if remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction") then
                 local name = remote.Name:lower()
                 if name:find("handshake") or name:find("validate") or name:find("verify") or name:find("integrity") or name:find("anti") then
                     pcall(function()
-                        if remote:IsA("RemoteEvent") then remote.FireServer = function(...) return true end
-                        elseif remote:IsA("RemoteFunction") then remote.InvokeServer = function(...) return true end end
+                        if remote:IsA("RemoteEvent") then
+                            remote.FireServer = function(...)
+                                return true
+                            end
+                        elseif remote:IsA("RemoteFunction") then
+                            remote.InvokeServer = function(...)
+                                return true
+                            end
+                        end
                     end)
                 end
             end
@@ -45,22 +94,33 @@ task.spawn(function()
 end)
 
 local Camera = workspace.CurrentCamera
-if Camera.ViewportSize.Y > Camera.ViewportSize.X then repeat task.wait(0.5) until Camera.ViewportSize.X > Camera.ViewportSize.Y; task.wait(1) end
+if Camera.ViewportSize.Y > Camera.ViewportSize.X then
+    repeat
+        task.wait(0.5)
+    until Camera.ViewportSize.X > Camera.ViewportSize.Y
+    task.wait(1)
+end
 
 -- ==========================================
 -- LOAD UI RAYFIELD
 -- ==========================================
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
 local Window = Rayfield:CreateWindow({
-   Name = "🎯 Lite Hack + Ultimate Mods",
-   LoadingTitle = "Memuat Cheat...",
-   LoadingSubtitle = "Anti GM/MOD Aktif!",
-   ConfigurationSaving = { Enabled = false },
-   Keybind = Enum.KeyCode.LeftControl, 
-   KeySystem = false
+    Name = "🎯 Lite Hack + Ultimate Mods",
+    LoadingTitle = "Memuat Cheat...",
+    LoadingSubtitle = "Anti GM/MOD Aktif!",
+    ConfigurationSaving = { Enabled = false },
+    Keybind = Enum.KeyCode.LeftControl,
+    KeySystem = false
 })
 
-Rayfield:Notify({ Title = "🛡️ Update Aktif", Content = "Fitur pelindung dari GM/Moderator telah ditambahkan.", Duration = 4, Image = 4483362458 })
+Rayfield:Notify({
+    Title = "🛡️ Update Aktif",
+    Content = "Fitur pelindung dari GM/Moderator telah ditambahkan.",
+    Duration = 4,
+    Image = 4483362458
+})
 
 -- ==========================================
 -- MEMBUAT TAB & VARIABEL
@@ -70,14 +130,20 @@ local TeleportTab = Window:CreateTab("📍 Teleport", 4483362458)
 local PlayerTab = Window:CreateTab("🏃 Player Hacks", 4483362458)
 local GunTab = Window:CreateTab("🔫 Gun Mods", 4483362458)
 
-local AimbotAktif, AimbotMode, AimTargetMode, ESPAktif, FFAModeAktif = false, "360° Anti-Tembok (Jarak 3D)", "Head", false, false
-local AutoTeleportAktif, ModeTP, TargetLawan = false, "Auto Cycle", ""
-local CurrentTargetPlayer, CurrentTargetCharacter, LastTargetPos, TargetStaticTime = nil, nil, nil, 0
-local BaseCFrame = nil 
+local AimbotAktif, AimbotMode, AimTargetMode, ESPAktif, FFAModeAktif =
+    false, "360° Anti-Tembok (Jarak 3D)", "Head", false, false
 
-local TeleportJarak = 6 
-local HindariShield = true 
-local TPBypassSpeed = 5 
+local AutoTeleportAktif, ModeTP, TargetLawan =
+    false, "Auto Cycle", ""
+
+local CurrentTargetPlayer, CurrentTargetCharacter, LastTargetPos, TargetStaticTime =
+    nil, nil, nil, 0
+
+local BaseCFrame = nil
+
+local TeleportJarak = 6
+local HindariShield = true
+local TPBypassSpeed = 5
 
 local SpeedAktif, JumpAktif, NoclipAktif = false, false, false
 local LockHeightAktif, AntiVoidAktif, AntiFallDamageAktif = false, false, false
@@ -89,17 +155,22 @@ local CustomFireRate = 800
 local RandomAimPartCache = "Head"
 local LastRandomAimUpdate = 0
 
-local AntiAdminAktif = false -- Variabel Anti-Admin
+local AntiAdminAktif = false
 
 local function GetTargetPart(char)
-    if not char then return nil end
+    if not char then
+        return nil
+    end
+
     if AimTargetMode == "Head" then
         return char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
     elseif AimTargetMode == "Body" then
-        return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+        return char:FindFirstChild("HumanoidRootPart")
+            or char:FindFirstChild("UpperTorso")
+            or char:FindFirstChild("Torso")
     elseif AimTargetMode == "Random" then
         local now = tick()
-        if now - LastRandomAimUpdate > 1.5 then 
+        if now - LastRandomAimUpdate > 1.5 then
             RandomAimPartCache = (math.random() > 0.5) and "Head" or "HumanoidRootPart"
             LastRandomAimUpdate = now
         end
@@ -111,38 +182,45 @@ end
 -- 0. LOGIKA ANTI-GM/MOD (DETEKSI)
 -- ==========================================
 local function CheckIfAdmin(p)
-    if p == LocalPlayer then return false end
-    
-    -- Cek nama dan display name untuk indikator umum
+    if p == LocalPlayer then
+        return false
+    end
+
     local nameRaw = string.upper(p.Name .. " " .. p.DisplayName)
-    if string.find(nameRaw, "%[GM%]") or string.find(nameRaw, "%[MOD%]") or string.find(nameRaw, "GAME MASTER") or string.find(nameRaw, "MODERATOR") then
+    if string.find(nameRaw, "%[GM%]")
+        or string.find(nameRaw, "%[MOD%]")
+        or string.find(nameRaw, "GAME MASTER")
+        or string.find(nameRaw, "MODERATOR")
+    then
         return true
     end
-    
-    -- Cek data leaderstats (Pangkat) berdasarkan data RankConfig yang bocor
+
     local ls = p:FindFirstChild("leaderstats")
     if ls then
         for _, stat in pairs(ls:GetChildren()) do
             local statValue = string.upper(tostring(stat.Value))
-            if statValue == "GM" or statValue == "MOD" or statValue == "GAME MASTER" or statValue == "MODERATOR" then
+            if statValue == "GM"
+                or statValue == "MOD"
+                or statValue == "GAME MASTER"
+                or statValue == "MODERATOR"
+            then
                 return true
             end
         end
     end
+
     return false
 end
 
--- Event Listener: Kalau ada pemain baru masuk
 Players.PlayerAdded:Connect(function(p)
     if AntiAdminAktif then
-        task.wait(1) -- Beri jeda sedikit agar data player loading
+        task.wait(1)
         if CheckIfAdmin(p) then
-            LocalPlayer:Kick("🚨 ANTI-ADMIN: Seorang Moderator/GM ["..p.Name.."] baru saja masuk ke room! Auto-Leave diaktifkan untuk mencegah Banned.")
+            LocalPlayer:Kick("🚨 ANTI-ADMIN: Seorang Moderator/GM [" .. p.Name .. "] baru saja masuk ke room! Auto-Leave diaktifkan untuk mencegah Banned.")
         end
     end
 end)
 
--- Loop Checker: Untuk mengecek pemain yang sudah ada di room
 task.spawn(function()
     while task.wait(3) do
         if AntiAdminAktif then
@@ -158,82 +236,378 @@ end)
 -- ==========================================
 -- 1. MENU TOGGLES (MAIN FEATURES)
 -- ==========================================
-Tab:CreateToggle({ Name = "🚨 Anti-GM/MOD (Auto Leave Server)", CurrentValue = false, Flag = "AntiAdminToggle", Callback = function(Value) AntiAdminAktif = Value end })
-Tab:CreateToggle({ Name = "🎯 Aktifkan Auto Aim", CurrentValue = false, Flag = "AimbotToggle", Callback = function(Value) AimbotAktif = Value end })
-Tab:CreateDropdown({ Name = "⚙️ Mode Auto Aim", Options = {"360° Anti-Tembok (Jarak 3D)", "Kunci Kamera (Terdekat Tengah Layar)"}, CurrentOption = "360° Anti-Tembok (Jarak 3D)", MultipleOptions = false, Flag = "AimMode", Callback = function(Option) AimbotMode = Option[1] end })
-Tab:CreateDropdown({ Name = "🎯 Target Bagian Tubuh", Options = {"Head", "Body", "Random"}, CurrentOption = "Head", MultipleOptions = false, Flag = "AimTarget", Callback = function(Option) AimTargetMode = Option[1] end })
-Tab:CreateToggle({ Name = "👁️ Enemy ESP (Melihat Musuh)", CurrentValue = false, Flag = "ESPToggle", Callback = function(Value) ESPAktif = Value end })
-Tab:CreateToggle({ Name = "⚔️ Mode FFA (Hajar Semua/Bypass Tim)", CurrentValue = false, Flag = "FFAToggle", Callback = function(Value) FFAModeAktif = Value end })
+Tab:CreateToggle({
+    Name = "🚨 Anti-GM/MOD (Auto Leave Server)",
+    CurrentValue = false,
+    Flag = "AntiAdminToggle",
+    Callback = function(Value)
+        AntiAdminAktif = Value
+    end
+})
+
+Tab:CreateToggle({
+    Name = "🎯 Aktifkan Auto Aim",
+    CurrentValue = false,
+    Flag = "AimbotToggle",
+    Callback = function(Value)
+        AimbotAktif = Value
+    end
+})
+
+Tab:CreateDropdown({
+    Name = "⚙️ Mode Auto Aim",
+    Options = {
+        "360° Anti-Tembok (Jarak 3D)",
+        "Kunci Kamera (Terdekat Tengah Layar)"
+    },
+    CurrentOption = "360° Anti-Tembok (Jarak 3D)",
+    MultipleOptions = false,
+    Flag = "AimMode",
+    Callback = function(Option)
+        AimbotMode = Option[1]
+    end
+})
+
+Tab:CreateDropdown({
+    Name = "🎯 Target Bagian Tubuh",
+    Options = {"Head", "Body", "Random"},
+    CurrentOption = "Head",
+    MultipleOptions = false,
+    Flag = "AimTarget",
+    Callback = function(Option)
+        AimTargetMode = Option[1]
+    end
+})
+
+Tab:CreateToggle({
+    Name = "👁️ Enemy ESP (Melihat Musuh)",
+    CurrentValue = false,
+    Flag = "ESPToggle",
+    Callback = function(Value)
+        ESPAktif = Value
+    end
+})
+
+Tab:CreateToggle({
+    Name = "⚔️ Mode FFA (Hajar Semua/Bypass Tim)",
+    CurrentValue = false,
+    Flag = "FFAToggle",
+    Callback = function(Value)
+        FFAModeAktif = Value
+    end
+})
 
 -- ==========================================
 -- 2. MENU TELEPORT
 -- ==========================================
-TeleportTab:CreateButton({ Name = "🏠 Set Posisi Base Saat Ini", Callback = function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        BaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-        Rayfield:Notify({Title = "Base Diatur!", Content = "Jika musuh kebal/habis, kamu akan meluncur ke sini.", Duration = 3})
+TeleportTab:CreateButton({
+    Name = "🏠 Set Posisi Base Saat Ini",
+    Callback = function()
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            BaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+            Rayfield:Notify({
+                Title = "Base Diatur!",
+                Content = "Jika musuh kebal/habis, kamu akan meluncur ke sini.",
+                Duration = 3
+            })
+        end
     end
-end })
+})
 
-TeleportTab:CreateToggle({ Name = "🔄 Auto Teleport Ke Belakang Musuh", CurrentValue = false, Flag = "AutoTPToggle", Callback = function(Value) 
-    AutoTeleportAktif = Value; 
-    if Value then
-        if not BaseCFrame and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then BaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame end
-    else CurrentTargetPlayer, CurrentTargetCharacter, LastTargetPos, TargetStaticTime = nil, nil, nil, 0 end 
-end })
+TeleportTab:CreateToggle({
+    Name = "🔄 Auto Teleport Ke Belakang Musuh",
+    CurrentValue = false,
+    Flag = "AutoTPToggle",
+    Callback = function(Value)
+        AutoTeleportAktif = Value
 
-TeleportTab:CreateSlider({ Name = "💨 Kecepatan Meluncur (Bypass AC)", Range = {1, 20}, Increment = 1, Suffix = " Speed", CurrentValue = 5, Flag = "TPBypass", Callback = function(Value) TPBypassSpeed = Value end })
-TeleportTab:CreateSlider({ Name = "📏 Jarak Teleport (Mundur)", Range = {2, 20}, Increment = 1, Suffix = " Studs", CurrentValue = 6, Flag = "TPDist", Callback = function(Value) TeleportJarak = Value end })
-TeleportTab:CreateToggle({ Name = "🛡️ Hindari Musuh Kebal (Spawn Protect)", CurrentValue = true, Flag = "AntiFFToggle", Callback = function(Value) HindariShield = Value end })
+        if Value then
+            if not BaseCFrame
+                and LocalPlayer.Character
+                and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            then
+                BaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+            end
+        else
+            CurrentTargetPlayer, CurrentTargetCharacter, LastTargetPos, TargetStaticTime =
+                nil, nil, nil, 0
+        end
+    end
+})
 
-TeleportTab:CreateDropdown({ Name = "⚙️ Mode Teleport", Options = {"Auto Cycle", "Pilih Lawan"}, CurrentOption = "Auto Cycle", MultipleOptions = false, Flag = "TPMode", Callback = function(Option) ModeTP = Option[1]; CurrentTargetPlayer, CurrentTargetCharacter, LastTargetPos, TargetStaticTime = nil, nil, nil, 0 end })
-TeleportTab:CreateButton({ Name = "⏭️ Paksa Ganti Target (Skip)", Callback = function() CurrentTargetPlayer, CurrentTargetCharacter, LastTargetPos, TargetStaticTime = nil, nil, nil, 0; Rayfield:Notify({Title = "Skip", Content = "Mencari target baru...", Duration = 2}) end })
-local TeleportDropdown = TeleportTab:CreateDropdown({ Name = "📍 Pilih Lawan", Options = {"Tunggu refresh..."}, CurrentOption = "", MultipleOptions = false, Flag = "TeleportDropdown", Callback = function(Option) TargetLawan = Option[1] end })
-TeleportTab:CreateButton({ Name = "🔄 Refresh Daftar Lawan", Callback = function()
-    local newList = {}
-    for _, p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer then table.insert(newList, p.Name) end end
-    TeleportDropdown:Refresh(newList, true)
-end })
+TeleportTab:CreateSlider({
+    Name = "💨 Kecepatan Meluncur (Bypass AC)",
+    Range = {1, 20},
+    Increment = 1,
+    Suffix = " Speed",
+    CurrentValue = 5,
+    Flag = "TPBypass",
+    Callback = function(Value)
+        TPBypassSpeed = Value
+    end
+})
+
+TeleportTab:CreateSlider({
+    Name = "📏 Jarak Teleport (Mundur)",
+    Range = {2, 20},
+    Increment = 1,
+    Suffix = " Studs",
+    CurrentValue = 6,
+    Flag = "TPDist",
+    Callback = function(Value)
+        TeleportJarak = Value
+    end
+})
+
+TeleportTab:CreateToggle({
+    Name = "🛡️ Hindari Musuh Kebal (Spawn Protect)",
+    CurrentValue = true,
+    Flag = "AntiFFToggle",
+    Callback = function(Value)
+        HindariShield = Value
+    end
+})
+
+TeleportTab:CreateDropdown({
+    Name = "⚙️ Mode Teleport",
+    Options = {"Auto Cycle", "Pilih Lawan"},
+    CurrentOption = "Auto Cycle",
+    MultipleOptions = false,
+    Flag = "TPMode",
+    Callback = function(Option)
+        ModeTP = Option[1]
+        CurrentTargetPlayer, CurrentTargetCharacter, LastTargetPos, TargetStaticTime =
+            nil, nil, nil, 0
+    end
+})
+
+TeleportTab:CreateButton({
+    Name = "⏭️ Paksa Ganti Target (Skip)",
+    Callback = function()
+        CurrentTargetPlayer, CurrentTargetCharacter, LastTargetPos, TargetStaticTime =
+            nil, nil, nil, 0
+        Rayfield:Notify({
+            Title = "Skip",
+            Content = "Mencari target baru...",
+            Duration = 2
+        })
+    end
+})
+
+local TeleportDropdown = TeleportTab:CreateDropdown({
+    Name = "📍 Pilih Lawan",
+    Options = {"Tunggu refresh..."},
+    CurrentOption = "",
+    MultipleOptions = false,
+    Flag = "TeleportDropdown",
+    Callback = function(Option)
+        TargetLawan = Option[1]
+    end
+})
+
+TeleportTab:CreateButton({
+    Name = "🔄 Refresh Daftar Lawan",
+    Callback = function()
+        local newList = {}
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer then
+                table.insert(newList, p.Name)
+            end
+        end
+        TeleportDropdown:Refresh(newList, true)
+    end
+})
 
 -- ==========================================
 -- 3 & 4. MENU TOGGLES (PLAYER & GUN)
 -- ==========================================
-PlayerTab:CreateToggle({ Name = "👻 Noclip (Tembus Dinding)", CurrentValue = false, Flag = "NoclipToggle", Callback = function(Value) NoclipAktif = Value end })
-PlayerTab:CreateToggle({ Name = "🛡️ No Fall Damage (Anti Mati Jatuh)", CurrentValue = false, Flag = "AntiFallToggle", Callback = function(Value) AntiFallDamageAktif = Value end })
-PlayerTab:CreateToggle({ Name = "🕳️ Anti-Void (Teleport Naik Jika Jatuh)", CurrentValue = false, Flag = "AntiVoidToggle", Callback = function(Value) AntiVoidAktif = Value end })
-PlayerTab:CreateToggle({ Name = "🔒 Kunci Ketinggian (Jalan di Udara)", CurrentValue = false, Flag = "LockHeightToggle", Callback = function(Value) LockHeightAktif = Value; if Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then LockedHeight = LocalPlayer.Character.HumanoidRootPart.Position.Y end end })
-PlayerTab:CreateButton({ Name = "⬆️ Naikkan Ketinggian (+5)", Callback = function() if LockHeightAktif then LockedHeight = LockedHeight + 5 end end })
-PlayerTab:CreateButton({ Name = "⬇️ Turunkan Ketinggian (-5)", Callback = function() if LockHeightAktif then LockedHeight = LockedHeight - 5 end end })
-PlayerTab:CreateToggle({ Name = "⚡ Aktifkan Speed Lari", CurrentValue = false, Flag = "SpeedToggle", Callback = function(Value) SpeedAktif = Value; if not Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then LocalPlayer.Character.Humanoid.WalkSpeed = 16 end end })
-PlayerTab:CreateSlider({ Name = "⚙️ Atur Kecepatan", Range = {16, 250}, Increment = 1, Suffix = " Speed", CurrentValue = 50, Flag = "SpeedSlider", Callback = function(Value) CustomSpeed = Value end })
-PlayerTab:CreateToggle({ Name = "🚀 Aktifkan Lompat Tinggi", CurrentValue = false, Flag = "JumpToggle", Callback = function(Value) JumpAktif = Value; if not Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then LocalPlayer.Character.Humanoid.UseJumpPower = true; LocalPlayer.Character.Humanoid.JumpPower = 50 end end })
-PlayerTab:CreateSlider({ Name = "⚙️ Atur Lompatan", Range = {50, 250}, Increment = 1, Suffix = " Power", CurrentValue = 100, Flag = "JumpSlider", Callback = function(Value) CustomJump = Value end })
+PlayerTab:CreateToggle({
+    Name = "👻 Noclip (Tembus Dinding)",
+    CurrentValue = false,
+    Flag = "NoclipToggle",
+    Callback = function(Value)
+        NoclipAktif = Value
+    end
+})
 
-GunTab:CreateToggle({ Name = "🔫 Aktifkan Gun Mods (Ammo, Akurasi Laser, Rapid Fire)", CurrentValue = false, Flag = "GunModsToggle", Callback = function(Value) GunModsAktif = Value end })
-GunTab:CreateSlider({ Name = "⚡ Kecepatan Tembak (RPM)", Range = {400, 2500}, Increment = 50, Suffix = " RPM", CurrentValue = 800, Flag = "FireRateSlider", Callback = function(Value) CustomFireRate = Value end })
+PlayerTab:CreateToggle({
+    Name = "🛡️ No Fall Damage (Anti Mati Jatuh)",
+    CurrentValue = false,
+    Flag = "AntiFallToggle",
+    Callback = function(Value)
+        AntiFallDamageAktif = Value
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "🕳️ Anti-Void (Teleport Naik Jika Jatuh)",
+    CurrentValue = false,
+    Flag = "AntiVoidToggle",
+    Callback = function(Value)
+        AntiVoidAktif = Value
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "🔒 Kunci Ketinggian (Jalan di Udara)",
+    CurrentValue = false,
+    Flag = "LockHeightToggle",
+    Callback = function(Value)
+        LockHeightAktif = Value
+        if Value
+            and LocalPlayer.Character
+            and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        then
+            LockedHeight = LocalPlayer.Character.HumanoidRootPart.Position.Y
+        end
+    end
+})
+
+PlayerTab:CreateButton({
+    Name = "⬆️ Naikkan Ketinggian (+5)",
+    Callback = function()
+        if LockHeightAktif then
+            LockedHeight = LockedHeight + 5
+        end
+    end
+})
+
+PlayerTab:CreateButton({
+    Name = "⬇️ Turunkan Ketinggian (-5)",
+    Callback = function()
+        if LockHeightAktif then
+            LockedHeight = LockedHeight - 5
+        end
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "⚡ Aktifkan Speed Lari",
+    CurrentValue = false,
+    Flag = "SpeedToggle",
+    Callback = function(Value)
+        SpeedAktif = Value
+        if (not Value)
+            and LocalPlayer.Character
+            and LocalPlayer.Character:FindFirstChild("Humanoid")
+        then
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        end
+    end
+})
+
+PlayerTab:CreateSlider({
+    Name = "⚙️ Atur Kecepatan",
+    Range = {16, 250},
+    Increment = 1,
+    Suffix = " Speed",
+    CurrentValue = 50,
+    Flag = "SpeedSlider",
+    Callback = function(Value)
+        CustomSpeed = Value
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "🚀 Aktifkan Lompat Tinggi",
+    CurrentValue = false,
+    Flag = "JumpToggle",
+    Callback = function(Value)
+        JumpAktif = Value
+        if (not Value)
+            and LocalPlayer.Character
+            and LocalPlayer.Character:FindFirstChild("Humanoid")
+        then
+            LocalPlayer.Character.Humanoid.UseJumpPower = true
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+        end
+    end
+})
+
+PlayerTab:CreateSlider({
+    Name = "⚙️ Atur Lompatan",
+    Range = {50, 250},
+    Increment = 1,
+    Suffix = " Power",
+    CurrentValue = 100,
+    Flag = "JumpSlider",
+    Callback = function(Value)
+        CustomJump = Value
+    end
+})
+
+GunTab:CreateToggle({
+    Name = "🔫 Aktifkan Gun Mods (Ammo, Akurasi Laser, Rapid Fire)",
+    CurrentValue = false,
+    Flag = "GunModsToggle",
+    Callback = function(Value)
+        GunModsAktif = Value
+    end
+})
+
+GunTab:CreateSlider({
+    Name = "⚡ Kecepatan Tembak (RPM)",
+    Range = {400, 2500},
+    Increment = 50,
+    Suffix = " RPM",
+    CurrentValue = 800,
+    Flag = "FireRateSlider",
+    Callback = function(Value)
+        CustomFireRate = Value
+    end
+})
 
 -- ==========================================
 -- CACHE ENTITY (ANTI-LAG) & LOGIKA TIM
 -- ==========================================
 local ValidEntities = {}
+
 task.spawn(function()
     while task.wait(0.5) do
         local currentList = {}
-        for _, p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character then table.insert(currentList, p.Character) end end
-        for _, obj in pairs(workspace:GetChildren()) do
-            if obj:IsA("Model") and obj ~= LocalPlayer.Character and not Players:GetPlayerFromCharacter(obj) and obj:FindFirstChildOfClass("Humanoid") then table.insert(currentList, obj) end
+
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                table.insert(currentList, p.Character)
+            end
         end
+
+        for _, obj in pairs(workspace:GetChildren()) do
+            if obj:IsA("Model")
+                and obj ~= LocalPlayer.Character
+                and not Players:GetPlayerFromCharacter(obj)
+                and obj:FindFirstChildOfClass("Humanoid")
+            then
+                table.insert(currentList, obj)
+            end
+        end
+
         ValidEntities = currentList
     end
 end)
 
 local function IsEnemy(model)
-    if FFAModeAktif then return true end
+    if FFAModeAktif then
+        return true
+    end
+
     local plr = Players:GetPlayerFromCharacter(model)
     if plr then
-        if plr.Team ~= nil and LocalPlayer.Team ~= nil and plr.Team == LocalPlayer.Team then return false end
-        if plr.TeamColor ~= nil and LocalPlayer.TeamColor ~= nil and plr.TeamColor == LocalPlayer.TeamColor then return false end
+        if plr.Team ~= nil
+            and LocalPlayer.Team ~= nil
+            and plr.Team == LocalPlayer.Team
+        then
+            return false
+        end
+
+        if plr.TeamColor ~= nil
+            and LocalPlayer.TeamColor ~= nil
+            and plr.TeamColor == LocalPlayer.TeamColor
+        then
+            return false
+        end
     end
+
     return true
 end
 
@@ -243,96 +617,186 @@ end
 local TPTween = nil
 local LastTweenTargetPos = Vector3.zero
 
-RunService.Heartbeat:Connect(function(deltaTime) 
-    if AutoTeleportAktif and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+RunService.Heartbeat:Connect(function(deltaTime)
+    if AutoTeleportAktif
+        and LocalPlayer.Character
+        and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    then
         local myPos = LocalPlayer.Character.HumanoidRootPart
         local targetCharToTP = nil
-        local abandonedPlayer = nil 
+        local abandonedPlayer = nil
 
         if ModeTP == "Auto Cycle" then
             local needsNewTarget = false
+
             if CurrentTargetPlayer then
-                if not CurrentTargetPlayer.Parent then needsNewTarget = true; abandonedPlayer = CurrentTargetPlayer
-                elseif CurrentTargetPlayer.Character ~= CurrentTargetCharacter then needsNewTarget = true; abandonedPlayer = CurrentTargetPlayer
-                elseif CurrentTargetCharacter and CurrentTargetCharacter:FindFirstChild("HumanoidRootPart") and CurrentTargetCharacter:FindFirstChild("Humanoid") then
-                    if HindariShield and CurrentTargetCharacter:FindFirstChildOfClass("ForceField") then
-                        needsNewTarget = true; abandonedPlayer = CurrentTargetPlayer
-                    elseif CurrentTargetCharacter.Humanoid.Health <= 0 then needsNewTarget = true; abandonedPlayer = CurrentTargetPlayer
+                if not CurrentTargetPlayer.Parent then
+                    needsNewTarget = true
+                    abandonedPlayer = CurrentTargetPlayer
+                elseif CurrentTargetPlayer.Character ~= CurrentTargetCharacter then
+                    needsNewTarget = true
+                    abandonedPlayer = CurrentTargetPlayer
+                elseif CurrentTargetCharacter
+                    and CurrentTargetCharacter:FindFirstChild("HumanoidRootPart")
+                    and CurrentTargetCharacter:FindFirstChild("Humanoid")
+                then
+                    if HindariShield
+                        and CurrentTargetCharacter:FindFirstChildOfClass("ForceField")
+                    then
+                        needsNewTarget = true
+                        abandonedPlayer = CurrentTargetPlayer
+                    elseif CurrentTargetCharacter.Humanoid.Health <= 0 then
+                        needsNewTarget = true
+                        abandonedPlayer = CurrentTargetPlayer
                     elseif LastTargetPos then
-                        local distanceMoved = (CurrentTargetCharacter.HumanoidRootPart.Position - LastTargetPos).Magnitude
-                        if distanceMoved > 60 then needsNewTarget = true; abandonedPlayer = CurrentTargetPlayer
-                        elseif distanceMoved < 0.1 then TargetStaticTime = TargetStaticTime + deltaTime; if TargetStaticTime > 1.5 then needsNewTarget = true; abandonedPlayer = CurrentTargetPlayer end
-                        else TargetStaticTime = 0 end
+                        local distanceMoved =
+                            (CurrentTargetCharacter.HumanoidRootPart.Position - LastTargetPos).Magnitude
+
+                        if distanceMoved > 60 then
+                            needsNewTarget = true
+                            abandonedPlayer = CurrentTargetPlayer
+                        elseif distanceMoved < 0.1 then
+                            TargetStaticTime = TargetStaticTime + deltaTime
+                            if TargetStaticTime > 1.5 then
+                                needsNewTarget = true
+                                abandonedPlayer = CurrentTargetPlayer
+                            end
+                        else
+                            TargetStaticTime = 0
+                        end
                     end
-                    if not needsNewTarget then LastTargetPos = CurrentTargetCharacter.HumanoidRootPart.Position end
-                else needsNewTarget = true; abandonedPlayer = CurrentTargetPlayer end
-            else needsNewTarget = true end
+
+                    if not needsNewTarget then
+                        LastTargetPos = CurrentTargetCharacter.HumanoidRootPart.Position
+                    end
+                else
+                    needsNewTarget = true
+                    abandonedPlayer = CurrentTargetPlayer
+                end
+            else
+                needsNewTarget = true
+            end
 
             if needsNewTarget then
-                CurrentTargetPlayer, CurrentTargetCharacter, LastTargetPos, TargetStaticTime = nil, nil, nil, 0 
+                CurrentTargetPlayer, CurrentTargetCharacter, LastTargetPos, TargetStaticTime =
+                    nil, nil, nil, 0
+
                 local validEnemies = {}
+
                 for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p ~= abandonedPlayer and p.Character and IsEnemy(p.Character) and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 and p.Character:FindFirstChild("HumanoidRootPart") then
-                        if not (HindariShield and p.Character:FindFirstChildOfClass("ForceField")) then table.insert(validEnemies, p) end
+                    if p ~= LocalPlayer
+                        and p ~= abandonedPlayer
+                        and p.Character
+                        and IsEnemy(p.Character)
+                        and p.Character:FindFirstChild("Humanoid")
+                        and p.Character.Humanoid.Health > 0
+                        and p.Character:FindFirstChild("HumanoidRootPart")
+                        and not (HindariShield and p.Character:FindFirstChildOfClass("ForceField"))
+                    then
+                        table.insert(validEnemies, p)
                     end
                 end
+
                 if #validEnemies == 0 and abandonedPlayer then
                     for _, p in pairs(Players:GetPlayers()) do
-                        if p ~= LocalPlayer and p.Character and IsEnemy(p.Character) and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 and p.Character:FindFirstChild("HumanoidRootPart") then 
-                            if not (HindariShield and p.Character:FindFirstChildOfClass("ForceField")) then table.insert(validEnemies, p) end
+                        if p ~= LocalPlayer
+                            and p.Character
+                            and IsEnemy(p.Character)
+                            and p.Character:FindFirstChild("Humanoid")
+                            and p.Character.Humanoid.Health > 0
+                            and p.Character:FindFirstChild("HumanoidRootPart")
+                            and not (HindariShield and p.Character:FindFirstChildOfClass("ForceField"))
+                        then
+                            table.insert(validEnemies, p)
                         end
                     end
                 end
-                if #validEnemies > 0 then 
+
+                if #validEnemies > 0 then
                     CurrentTargetPlayer = validEnemies[math.random(1, #validEnemies)]
                     CurrentTargetCharacter = CurrentTargetPlayer.Character
-                    if CurrentTargetCharacter and CurrentTargetCharacter:FindFirstChild("HumanoidRootPart") then LastTargetPos = CurrentTargetCharacter.HumanoidRootPart.Position end
+                    if CurrentTargetCharacter
+                        and CurrentTargetCharacter:FindFirstChild("HumanoidRootPart")
+                    then
+                        LastTargetPos = CurrentTargetCharacter.HumanoidRootPart.Position
+                    end
                 end
             end
-            if CurrentTargetPlayer and CurrentTargetCharacter then targetCharToTP = CurrentTargetCharacter end
 
+            if CurrentTargetPlayer and CurrentTargetCharacter then
+                targetCharToTP = CurrentTargetCharacter
+            end
         elseif ModeTP == "Pilih Lawan" then
             local p = Players:FindFirstChild(TargetLawan)
-            if p and p.Character and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 and IsEnemy(p.Character) then 
-                if not (HindariShield and p.Character:FindFirstChildOfClass("ForceField")) then targetCharToTP = p.Character end
+            if p
+                and p.Character
+                and p.Character:FindFirstChild("Humanoid")
+                and p.Character.Humanoid.Health > 0
+                and IsEnemy(p.Character)
+                and not (HindariShield and p.Character:FindFirstChildOfClass("ForceField"))
+            then
+                targetCharToTP = p.Character
             end
         end
 
         local function TweenTeleport(targetCFrame)
             local dist = (myPos.Position - targetCFrame.Position).Magnitude
+
             if dist > 15 then
-                myPos.Velocity = Vector3.zero 
-                if not TPTween or (LastTweenTargetPos - targetCFrame.Position).Magnitude > 5 then
-                    if TPTween then TPTween:Cancel() end
+                myPos.Velocity = Vector3.zero
+
+                if (not TPTween)
+                    or (LastTweenTargetPos - targetCFrame.Position).Magnitude > 5
+                then
+                    if TPTween then
+                        TPTween:Cancel()
+                    end
+
                     LastTweenTargetPos = targetCFrame.Position
-                    
-                    local speedMult = TPBypassSpeed * 15 
+
+                    local speedMult = TPBypassSpeed * 15
                     local timeReq = dist / speedMult
-                    
-                    TPTween = TweenService:Create(myPos, TweenInfo.new(timeReq, Enum.EasingStyle.Linear), {CFrame = targetCFrame})
+
+                    TPTween = TweenService:Create(
+                        myPos,
+                        TweenInfo.new(timeReq, Enum.EasingStyle.Linear),
+                        {CFrame = targetCFrame}
+                    )
                     TPTween:Play()
                 end
             else
-                if TPTween then TPTween:Cancel(); TPTween = nil end
+                if TPTween then
+                    TPTween:Cancel()
+                    TPTween = nil
+                end
                 myPos.CFrame = targetCFrame
             end
         end
 
         if targetCharToTP and targetCharToTP:FindFirstChild("HumanoidRootPart") then
-            local targetPos = targetCharToTP.HumanoidRootPart.CFrame * CFrame.new(0, 3, TeleportJarak)
+            local targetPos =
+                targetCharToTP.HumanoidRootPart.CFrame * CFrame.new(0, 3, TeleportJarak)
             TweenTeleport(targetPos)
-            
+
             if AimbotAktif then
                 local aimPart = GetTargetPart(targetCharToTP)
-                if aimPart then Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, aimPart.Position) end
+                if aimPart then
+                    Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, aimPart.Position)
+                end
             end
         elseif BaseCFrame then
             TweenTeleport(BaseCFrame)
         else
-            if TPTween then TPTween:Cancel(); TPTween = nil end
+            if TPTween then
+                TPTween:Cancel()
+                TPTween = nil
+            end
         end
     else
-        if TPTween then TPTween:Cancel(); TPTween = nil end
+        if TPTween then
+            TPTween:Cancel()
+            TPTween = nil
+        end
     end
 end)
 
@@ -343,80 +807,191 @@ local CoreGui = game:GetService("CoreGui")
 local ESP_Folder = CoreGui:FindFirstChild("Universal_ESP_System") or Instance.new("Folder")
 ESP_Folder.Name = "Universal_ESP_System"
 ESP_Folder.Parent = CoreGui
+
 local Active_ESP = {}
 
 RunService.RenderStepped:Connect(function()
     if not ESPAktif then
-        for _, data in pairs(Active_ESP) do data.Highlight.Enabled = false; data.Gui.Enabled = false end
+        for _, data in pairs(Active_ESP) do
+            data.Highlight.Enabled = false
+            data.Gui.Enabled = false
+        end
         return
     end
+
     local EntitiesInFrame = {}
+
     for _, model in pairs(ValidEntities) do
         local hum = model:FindFirstChildOfClass("Humanoid")
-        local hrp = model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("Head") or model.PrimaryPart
+        local hrp = model:FindFirstChild("HumanoidRootPart")
+            or model:FindFirstChild("Head")
+            or model.PrimaryPart
+
         if model.Parent and hum and hum.Health > 0 and hrp and IsEnemy(model) then
             EntitiesInFrame[model] = true
+
             if not Active_ESP[model] then
                 local esp_data = {}
-                local hl = Instance.new("Highlight"); hl.Name = "ESP_Highlight"; hl.Adornee = model; hl.FillTransparency = 0.5; hl.OutlineTransparency = 0.1; hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop; hl.Parent = ESP_Folder
+
+                local hl = Instance.new("Highlight")
+                hl.Name = "ESP_Highlight"
+                hl.Adornee = model
+                hl.FillTransparency = 0.5
+                hl.OutlineTransparency = 0.1
+                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                hl.Parent = ESP_Folder
                 esp_data.Highlight = hl
-                local bgui = Instance.new("BillboardGui"); bgui.Name = "ESP_Tag"; bgui.Adornee = hrp; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 200, 0, 50); bgui.ExtentsOffset = Vector3.new(0, 3, 0); bgui.Parent = ESP_Folder
-                local txt = Instance.new("TextLabel"); txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.TextSize = 14; txt.Font = Enum.Font.Code; txt.TextStrokeTransparency = 0; txt.TextColor3 = Color3.fromRGB(255, 255, 255); txt.Parent = bgui
-                esp_data.TextLabel = txt; esp_data.Gui = bgui
+
+                local bgui = Instance.new("BillboardGui")
+                bgui.Name = "ESP_Tag"
+                bgui.Adornee = hrp
+                bgui.AlwaysOnTop = true
+                bgui.Size = UDim2.new(0, 200, 0, 50)
+                bgui.ExtentsOffset = Vector3.new(0, 3, 0)
+                bgui.Parent = ESP_Folder
+                esp_data.Gui = bgui
+
+                local txt = Instance.new("TextLabel")
+                txt.Size = UDim2.new(1, 0, 1, 0)
+                txt.BackgroundTransparency = 1
+                txt.TextSize = 14
+                txt.Font = Enum.Font.Code
+                txt.TextStrokeTransparency = 0
+                txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+                txt.Parent = bgui
+                esp_data.TextLabel = txt
+
                 Active_ESP[model] = esp_data
             end
+
             local data = Active_ESP[model]
-            data.Highlight.Enabled = true; data.Gui.Enabled = true
-            local jarak = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and math.floor((LocalPlayer.Character.HumanoidRootPart.Position - hrp.Position).Magnitude) or 0
-            local isTarget = (AutoTeleportAktif and model == CurrentTargetCharacter)
-            
+            data.Highlight.Enabled = true
+            data.Gui.Enabled = true
+
+            local jarak = 0
+            if LocalPlayer.Character
+                and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            then
+                jarak = math.floor(
+                    (LocalPlayer.Character.HumanoidRootPart.Position
+                        - hrp.Position).Magnitude
+                )
+            end
+
+            local isTarget =
+                (AutoTeleportAktif and model == CurrentTargetCharacter)
             local isShielded = HindariShield and model:FindFirstChildOfClass("ForceField")
-            if isShielded then data.Highlight.FillColor = Color3.fromRGB(0, 0, 255)
-            else data.Highlight.FillColor = isTarget and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0) end
-            
-            data.TextLabel.Text = (model.Name or "Bot") .. (isShielded and " [KEBAL]" or "") .. " [" .. jarak .. "m]"
-            data.TextLabel.TextColor3 = isTarget and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 255)
+
+            if isShielded then
+                data.Highlight.FillColor = Color3.fromRGB(0, 0, 255)
+            else
+                data.Highlight.FillColor = isTarget
+                    and Color3.fromRGB(0, 255, 0)
+                    or Color3.fromRGB(255, 0, 0)
+            end
+
+            data.TextLabel.Text =
+                (model.Name or "Bot")
+                .. (isShielded and " [KEBAL]" or "")
+                .. " ["
+                .. jarak
+                .. "m]"
+            data.TextLabel.TextColor3 = isTarget
+                and Color3.fromRGB(0, 255, 0)
+                or Color3.fromRGB(255, 255, 255)
         end
     end
-    for model, data in pairs(Active_ESP) do if not EntitiesInFrame[model] then data.Highlight:Destroy(); data.Gui:Destroy(); Active_ESP[model] = nil end end
+
+    for model, data in pairs(Active_ESP) do
+        if not EntitiesInFrame[model] then
+            if data.Highlight then
+                data.Highlight:Destroy()
+            end
+            if data.Gui then
+                data.Gui:Destroy()
+            end
+            Active_ESP[model] = nil
+        end
+    end
 end)
 
 -- ==========================================
 -- LOGIKA AIMBOT
 -- ==========================================
 local LockedTarget = nil
+
 local function IsVisible(targetPart)
-    if not targetPart then return false end
-    local rayParams = RaycastParams.new(); rayParams.FilterDescendantsInstances = {LocalPlayer.Character, Camera}; rayParams.FilterType = Enum.RaycastFilterType.Exclude
-    local rayResult = workspace:Raycast(Camera.CFrame.Position, (targetPart.Position - Camera.CFrame.Position).Unit * 5000, rayParams)
+    if not targetPart then
+        return false
+    end
+
+    local rayParams = RaycastParams.new()
+    rayParams.FilterDescendantsInstances = {LocalPlayer.Character, Camera}
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+
+    local rayResult = workspace:Raycast(
+        Camera.CFrame.Position,
+        (targetPart.Position - Camera.CFrame.Position).Unit * 5000,
+        rayParams
+    )
+
     return rayResult and rayResult.Instance:IsDescendantOf(targetPart.Parent) or false
 end
+
 local function GetNewTarget3D()
     local closest, shortestDist = nil, math.huge
+
     for _, item in pairs(ValidEntities) do
         local hum = item:FindFirstChildOfClass("Humanoid")
         local targetPart = GetTargetPart(item)
-        if item.Parent and hum and hum.Health > 0 and targetPart and IsEnemy(item) and IsVisible(targetPart) and not (HindariShield and item:FindFirstChildOfClass("ForceField")) then
+
+        if item.Parent
+            and hum
+            and hum.Health > 0
+            and targetPart
+            and IsEnemy(item)
+            and IsVisible(targetPart)
+            and not (HindariShield and item:FindFirstChildOfClass("ForceField"))
+        then
             local dist = (Camera.CFrame.Position - targetPart.Position).Magnitude
-            if dist < shortestDist then shortestDist = dist; closest = item end
-        end
-    end
-    return closest
-end
-local function GetClosestEnemy2D()
-    local closest, shortestDist = nil, math.huge
-    local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-    for _, item in pairs(ValidEntities) do
-        local hum = item:FindFirstChildOfClass("Humanoid")
-        local targetPart = GetTargetPart(item)
-        if item.Parent and hum and hum.Health > 0 and targetPart and IsEnemy(item) and not (HindariShield and item:FindFirstChildOfClass("ForceField")) then
-            local pos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
-            if onScreen then
-                local dist = (center - Vector2.new(pos.X, pos.Y)).Magnitude
-                if dist < shortestDist then shortestDist = dist; closest = item end
+            if dist < shortestDist then
+                shortestDist = dist
+                closest = item
             end
         end
     end
+
+    return closest
+end
+
+local function GetClosestEnemy2D()
+    local closest, shortestDist = nil, math.huge
+    local center =
+        Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+    for _, item in pairs(ValidEntities) do
+        local hum = item:FindFirstChildOfClass("Humanoid")
+        local targetPart = GetTargetPart(item)
+
+        if item.Parent
+            and hum
+            and hum.Health > 0
+            and targetPart
+            and IsEnemy(item)
+            and not (HindariShield and item:FindFirstChildOfClass("ForceField"))
+        then
+            local pos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+            if onScreen then
+                local dist =
+                    (center - Vector2.new(pos.X, pos.Y)).Magnitude
+                if dist < shortestDist then
+                    shortestDist = dist
+                    closest = item
+                end
+            end
+        end
+    end
+
     return closest
 end
 
@@ -424,53 +999,128 @@ RunService.RenderStepped:Connect(function()
     if AimbotAktif and not AutoTeleportAktif then
         if AimbotMode == "360° Anti-Tembok (Jarak 3D)" then
             local targetValid = false
+
             if LockedTarget and LockedTarget.Parent then
                 local hum = LockedTarget:FindFirstChildOfClass("Humanoid")
                 local targetPart = GetTargetPart(LockedTarget)
-                if hum and hum.Health > 0 and targetPart and IsEnemy(LockedTarget) and IsVisible(targetPart) and not (HindariShield and LockedTarget:FindFirstChildOfClass("ForceField")) then targetValid = true end
+
+                if hum
+                    and hum.Health > 0
+                    and targetPart
+                    and IsEnemy(LockedTarget)
+                    and IsVisible(targetPart)
+                    and not (HindariShield and LockedTarget:FindFirstChildOfClass("ForceField"))
+                then
+                    targetValid = true
+                end
             end
-            if not targetValid then LockedTarget = GetNewTarget3D() end
+
+            if not targetValid then
+                LockedTarget = GetNewTarget3D()
+            end
+
             if LockedTarget then
                 local targetPart = GetTargetPart(LockedTarget)
-                if targetPart then Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, targetPart.Position) end
+                if targetPart then
+                    Camera.CFrame =
+                        CFrame.lookAt(Camera.CFrame.Position, targetPart.Position)
+                end
             end
         elseif AimbotMode == "Kunci Kamera (Terdekat Tengah Layar)" then
             local target = GetClosestEnemy2D()
             if target then
                 local targetPart = GetTargetPart(target)
-                if targetPart then Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, targetPart.Position) end
+                if targetPart then
+                    Camera.CFrame =
+                        CFrame.lookAt(Camera.CFrame.Position, targetPart.Position)
+                end
             end
         end
-    else LockedTarget = nil end
+    else
+        LockedTarget = nil
+    end
 end)
 
 -- ==========================================
 -- LOGIKA FISIKA, MOVEMENT & NOCLIP FIX
 -- ==========================================
-pcall(function() local mt = getrawmetatable(game); if mt and mt.__index then local oldIndex = mt.__index; setreadonly(mt, false); mt.__index = newcclosure(function(t, k) if not checkcaller() and t:IsA("BasePart") and tostring(k) == "CanCollide" then return true end; return oldIndex(t, k) end); setreadonly(mt, true) end end)
+pcall(function()
+    local mt = getrawmetatable(game)
+    if mt and mt.__index then
+        local oldIndex = mt.__index
+        setreadonly(mt, false)
+        mt.__index = newcclosure(function(t, k)
+            if not checkcaller()
+                and t:IsA("BasePart")
+                and tostring(k) == "CanCollide"
+            then
+                return true
+            end
+            return oldIndex(t, k)
+        end)
+        setreadonly(mt, true)
+    end
+end)
 
 RunService.Stepped:Connect(function()
     if LocalPlayer.Character then
         local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
-        
-        if NoclipAktif then 
-            if hum then pcall(function() hum:ChangeState(11) end) end
-            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do 
-                if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false end 
-            end 
+
+        if NoclipAktif then
+            if hum then
+                pcall(function()
+                    hum:ChangeState(11)
+                end)
+            end
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
         elseif AutoTeleportAktif then
-            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do 
-                if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false end 
-            end 
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
         end
-        
+
         if hrp then
-            if AntiVoidAktif and hrp.Position.Y < -50 then LocalPlayer.Character:PivotTo(hrp.CFrame + Vector3.new(0, 150, 0)); hrp.Velocity = Vector3.zero end
-            if LockHeightAktif then LocalPlayer.Character:PivotTo(CFrame.new(hrp.Position.X, LockedHeight, hrp.Position.Z) * hrp.CFrame.Rotation); hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z) end
-            if AntiFallDamageAktif and hrp.Velocity.Y < -40 then local rayParams = RaycastParams.new(); rayParams.FilterDescendantsInstances = {LocalPlayer.Character}; rayParams.FilterType = Enum.RaycastFilterType.Exclude; local hit = workspace:Raycast(hrp.Position, Vector3.new(0, -20, 0), rayParams); if hit then hrp.Velocity = Vector3.new(hrp.Velocity.X, -10, hrp.Velocity.Z) end end
+            if AntiVoidAktif and hrp.Position.Y < -50 then
+                LocalPlayer.Character:PivotTo(hrp.CFrame + Vector3.new(0, 150, 0))
+                hrp.Velocity = Vector3.zero
+            end
+
+            if LockHeightAktif then
+                LocalPlayer.Character:PivotTo(
+                    CFrame.new(hrp.Position.X, LockedHeight, hrp.Position.Z)
+                    * hrp.CFrame.Rotation
+                )
+                hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+            end
+
+            if AntiFallDamageAktif and hrp.Velocity.Y < -40 then
+                local rayParams = RaycastParams.new()
+                rayParams.FilterDescendantsInstances = {LocalPlayer.Character}
+                rayParams.FilterType = Enum.RaycastFilterType.Exclude
+                local hit =
+                    workspace:Raycast(hrp.Position, Vector3.new(0, -20, 0), rayParams)
+                if hit then
+                    hrp.Velocity = Vector3.new(hrp.Velocity.X, -10, hrp.Velocity.Z)
+                end
+            end
         end
-        if hum then if SpeedAktif then hum.WalkSpeed = CustomSpeed end; if JumpAktif then hum.UseJumpPower = true; hum.JumpPower = CustomJump end end
+
+        if hum then
+            if SpeedAktif then
+                hum.WalkSpeed = CustomSpeed
+            end
+            if JumpAktif then
+                hum.UseJumpPower = true
+                hum.JumpPower = CustomJump
+            end
+        end
     end
 end)
 
@@ -478,34 +1128,55 @@ end)
 -- LOGIKA GUN MODS (LASER ACCURACY + RPM SPEED FIRE + NO RELOAD)
 -- ==========================================
 RunService.RenderStepped:Connect(function()
-    if not GunModsAktif then return end
-    
+    if not GunModsAktif then
+        return
+    end
+
     local char = LocalPlayer.Character
     if char then
         for _, tool in pairs(char:GetChildren()) do
-            if tool:IsA("Tool") or tool:IsA("Model") then 
-                pcall(function() 
+            if tool:IsA("Tool") or tool:IsA("Model") then
+                pcall(function()
                     local function SetSafe(attr, value)
-                        if tool:GetAttribute(attr) ~= nil and tool:GetAttribute(attr) ~= value then
+                        if tool:GetAttribute(attr) ~= nil
+                            and tool:GetAttribute(attr) ~= value
+                        then
                             tool:SetAttribute(attr, value)
                         end
                     end
-                    
+
                     SetSafe("TotalAmmo", 999999999)
                     SetSafe("NewMax", 999999999)
                     SetSafe("magazineSize", 999999999)
                     SetSafe("_ammo", 999999999)
-                    
+
                     SetSafe("spread", 0)
                     SetSafe("recoilMax", 0)
                     SetSafe("recoilMin", 0)
                     SetSafe("reloadTime", 0.05)
-                    
+
                     SetSafe("rateOfFire", CustomFireRate)
-                end) 
+                end)
             end
         end
     end
 end)
 
-task.spawn(function() pcall(function() for _, v in pairs(getgc(true)) do if type(v) == "table" and rawget(v, "recoil") and type(v.recoil) == "function" then local oldRecoil; oldRecoil = hookfunction(v.recoil, function(...) if GunModsAktif then return end; return oldRecoil(...) end) end end end) end)
+task.spawn(function()
+    pcall(function()
+        for _, v in pairs(getgc(true)) do
+            if type(v) == "table"
+                and rawget(v, "recoil")
+                and type(v.recoil) == "function"
+            then
+                local oldRecoil
+                oldRecoil = hookfunction(v.recoil, function(...)
+                    if GunModsAktif then
+                        return
+                    end
+                    return oldRecoil(...)
+                end)
+            end
+        end
+    end)
+end)
