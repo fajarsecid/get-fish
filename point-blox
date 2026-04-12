@@ -225,30 +225,36 @@ RunService.Stepped:Connect(function()
 end)
 
 -- ==========================================
--- LOGIKA GUN MODS (DIPINDAH KE LOOP 0.5s BIAR GAK LAG)
+-- LOGIKA GUN MODS (FIX MACET - KEMBALI KE RENDERSTEPPED TAPI TETAP RINGAN)
 -- ==========================================
-task.spawn(function()
-    while task.wait(0.5) do
-        if GunModsAktif and LocalPlayer.Character then
-            for _, tool in pairs(LocalPlayer.Character:GetChildren()) do
-                if tool:IsA("Tool") or tool:IsA("Model") then 
-                    pcall(function() 
-                        local function SetSafe(attr, value)
-                            if tool:GetAttribute(attr) ~= nil and tool:GetAttribute(attr) ~= value then
-                                tool:SetAttribute(attr, value)
-                            end
+RunService.RenderStepped:Connect(function()
+    if not GunModsAktif then return end
+    
+    local char = LocalPlayer.Character
+    if char then
+        for _, tool in pairs(char:GetChildren()) do
+            if tool:IsA("Tool") or tool:IsA("Model") then 
+                pcall(function() 
+                    local function SetSafe(attr, value)
+                        -- Hanya mengubah data jika berbeda (Sangat ringan untuk CPU, tidak bikin lag)
+                        if tool:GetAttribute(attr) ~= nil and tool:GetAttribute(attr) ~= value then
+                            tool:SetAttribute(attr, value)
                         end
-                        SetSafe("TotalAmmo", 999999999)
-                        SetSafe("NewMax", 999999999)
-                        SetSafe("magazineSize", 999999999)
-                        SetSafe("_ammo", 999999999)
-                        SetSafe("spread", 0)
-                        SetSafe("recoilMax", 0)
-                        SetSafe("recoilMin", 0)
-                        SetSafe("reloadTime", 0.05)
-                        SetSafe("rateOfFire", CustomFireRate)
-                    end) 
-                end
+                    end
+                    
+                    SetSafe("TotalAmmo", 999999999)
+                    SetSafe("NewMax", 999999999)
+                    SetSafe("magazineSize", 999999999)
+                    SetSafe("_ammo", 999999999)
+                    
+                    -- Pakai 0.01 (bukan 0) agar script game tidak Crash/Macet karena pembagian nol
+                    SetSafe("spread", 0.01)
+                    SetSafe("recoilMax", 0.01)
+                    SetSafe("recoilMin", 0.01)
+                    
+                    SetSafe("reloadTime", 0.05)
+                    SetSafe("rateOfFire", CustomFireRate)
+                end) 
             end
         end
     end
